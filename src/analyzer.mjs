@@ -85,8 +85,7 @@ export default function analyze(content, url) {
 
     return { wasEsModule: true, reexportNames, exportNames };
   }
-  if (nonBabelCJS.has(url))
-    return { wasEsModule: false };
+  if (nonBabelCJS.has(url)) return { wasEsModule: false };
 
   if (content.indexOf("__esModule") === -1) {
     nonBabelCJS.add(url);
