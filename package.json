@@ -20,7 +20,7 @@
     "rimraf": "^2.6.2"
   },
   "scripts": {
-    "test": "node test/index.js",
+    "test": "jest",
     "prettier": "./node_modules/.bin/prettier src/*.mjs test/index.js test/helpers/*.{js,ts} --write"
   },
   "engines": {
