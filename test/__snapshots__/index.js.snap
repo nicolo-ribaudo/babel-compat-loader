@@ -7,3 +7,31 @@ exports[`already-required-executed-once - babel 6: stdout 1`] = `"sub-module exe
 exports[`already-required-executed-once - babel 7: stderr 1`] = `undefined`;
 
 exports[`already-required-executed-once - babel 7: stdout 1`] = `"sub-module executed"`;
+
+exports[`already-required-live-bindings - babel 6: stderr 1`] = `undefined`;
+
+exports[`already-required-live-bindings - babel 6: stdout 1`] = `
+"3
+5"
+`;
+
+exports[`already-required-live-bindings - babel 7: stderr 1`] = `undefined`;
+
+exports[`already-required-live-bindings - babel 7: stdout 1`] = `
+"3
+5"
+`;
+
+exports[`non-babel-cjs-doesnt-exxport-named - babel 7: stderr 1`] = `
+"[ROOT]/index.mjs:1
+import { foo } from \\"./module.mjs\\";
+         ^^^
+SyntaxError: The requested module './module.mjs' does not provide an export named 'foo'
+    at ModuleJob._instantiate (internal/modules/esm/module_job.mjs:80:21)"
+`;
+
+exports[`non-babel-cjs-doesnt-exxport-named - babel 7: stdout 1`] = `undefined`;
+
+exports[`non-babel-cjs-exports-default - babel 7: stderr 1`] = `undefined`;
+
+exports[`non-babel-cjs-exports-default - babel 7: stdout 1`] = `"{ foo: 2, bar: 3 }"`;

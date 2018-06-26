@@ -13,7 +13,7 @@ const compilers = require("./compilers.js");
 
 async function compileFiles(fixture) {
   const { transform: toTransform } = fixture;
-  const importsRE = regG`(?<=(?:from\s*|require\()["']\./)(${toTransform.join(
+  const importsRE = regG`(?<=(?:from\s*|require\(|import\()["']\./)(${toTransform.join(
     "|"
   )})(?=["'])`;
   const transform = compilers[fixture.version];
@@ -64,8 +64,8 @@ module.exports = async function runFixture(fixture, loaderPath) {
       expect(actual.stderr).toMatchSnapshot("stderr");
     } else {
       const expected = await execFixture(srcFolder, loaderPath);
-      expect(actual.stdout).toBe(expected.stdout);
       expect(actual.stderr).toBe(expected.stderr);
+      expect(actual.stdout).toBe(expected.stdout);
     }
   });
 };

@@ -3,92 +3,80 @@ import path from "path";
 import { URL } from "url";
 import assert from "assert";
 
-import { nonBabelCJS, esReexports, esExportNames } from "./meta.mjs";
+import { esReexports, esExportNames } from "./meta.mjs";
 import { analyze } from "./analyzer.mjs";
 import { redefine, removeRange, readFile } from "./utils.mjs";
 
 export async function resolve(specifier, parentURL, defaultResolver) {
   const { format, url } = defaultResolver(specifier, parentURL);
 
-  if (format !== "cjs" || nonBabelCJS.has(url)) return { format, url };
-  if (esExportNames.has(url)) return { format: "dynamic", url };
-
-  const content = await readFile(new URL(url), "utf8");
-  const wasEsModule = analyze(content, url);
-
   return {
-    format: wasEsModule ? "dynamic" : format,
-    url
+    url,
+    format: format === "cjs" ? "dynamic" : format
   };
 }
 
 export async function dynamicInstantiate(url) {
+  const filename = new URL(url).pathname;
+
+  const content = await readFile(filename, "utf8");
+  const wasEsModule = analyze(content, url);
+
+  if (!wasEsModule) {
+    return {
+      exports: ["default"],
+      execute(exports) {
+        let module = Module._cache[filename];
+
+        if (!module) {
+          module = new Module(filename);
+          tryModuleLoad(module, filename);
+        }
+
+        exports.default.set(module.exports);
+      }
+    };
+  }
+
   const exportsNames = esExportNames.get(url);
   assert(exportsNames);
-
-  const filename = new URL(url).pathname;
 
   return {
     exports: Array.from(exportsNames),
     execute(exports) {
       let module = Module._cache[filename];
       const cached = !!module;
-      const oldExports = cached && module.exports;
 
-      if (!cached) {
-        module = new Module(filename);
-        Module._cache[filename] = module;
-      }
+      if (!cached) module = new Module(filename);
 
-      module.exports = createExportsProxy(exportsNames, exports);
+      defineExoprtsAccessors(exportsNames, exports, module.exports);
 
-      if (cached) {
-        for (const name of exportsNames) {
-          module.exports[name] = oldExports[name];
-        }
-      } else {
-        // We can't use Module.load because it tries to export
-        // `module.exports` as default.
-
-        assert(!module.loaded);
-        module.filename = filename;
-        module.paths = Module._nodeModulePaths(path.dirname(filename));
-        Module._extensions[".js"](module, filename);
-        module.loaded = true;
-      }
+      if (!cached) module.load(filename);
     }
   };
 }
 
-function createExportsProxy(exportsNames, exports) {
-  return new Proxy(
-    {},
-    {
-      set(target, key, value) {
-        const result = Reflect.set(target, key, value);
-        if (!result) return false;
+function tryModuleLoad(module, filename) {
+  let threw = true;
+  try {
+    Module._cache[filename] = module;
+    module.load(filename);
+    threw = false;
+  } finally {
+    if (threw) delete Module._cache[filename];
+  }
+}
 
-        if (key === "__esModule") return true;
-
-        assert(exportsNames.has(key));
-        exports[key].set(value);
-
-        return true;
-      },
-      defineProperty(target, key, value) {
-        const result = Reflect.defineProperty(target, key, value);
-        if (!result) return false;
-
-        if (key === "__esModule") return true;
-
-        assert(exportsNames.has(key));
-        // It will be initialized by the code injected by Module#_compile.
-        // exports[key].set(value.get());
-
-        return true;
-      }
-    }
-  );
+function defineExoprtsAccessors(exportsNames, exports, moduleExports) {
+  for (const name of exportsNames) {
+    exports[name].set(moduleExports[name]);
+    Object.defineProperty(moduleExports, name, {
+      enumerable: true,
+      configurable: true,
+      get: exports[name].get,
+      set: exports[name].set
+    });
+  }
 }
 
 redefine(
@@ -99,7 +87,10 @@ redefine(
       const url = new URL(filename, "file://").href;
 
       const wasEsModule = analyze(content, url);
-      const reexports = wasEsModule && esReexports.get(url);
+
+      if (!wasEsModule) return _compile.call(this, content, filename);
+
+      const reexports = esReexports.get(url);
 
       if (reexports) {
         let initCode = "";
@@ -128,5 +119,23 @@ redefine(
       }
 
       return _compile.call(this, content, filename);
+    }
+);
+
+// We need to overwrite this method to rpevent it from adding every cjs
+// file to the ESModules registry.
+redefine(
+  Module.prototype,
+  "load",
+  load =>
+    function(filename) {
+      assert(!this.loaded);
+      this.filename = filename;
+      this.paths = Module._nodeModulePaths(path.dirname(filename));
+
+      var extension = path.extname(filename) || ".js";
+      if (!Module._extensions[extension]) extension = ".js";
+      Module._extensions[extension](this, filename);
+      this.loaded = true;
     }
 );

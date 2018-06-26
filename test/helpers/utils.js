@@ -9,10 +9,11 @@ exports.maybeTrim = obj => (typeof obj === "string" ? obj.trim() : obj);
 
 exports.canonicalyzeStderr = function(stderr) {
   return stderr
-    .trim()
-    .replace(/\(node:\d+\) ExperimentalWarning: .*?\n/g, "")
+    .replace(/^\(node:\d+\) ExperimentalWarning:.*?$/gm, "")
+    .replace(/^\[babel-compat-loader\].*?$/gm, "")
     .replace(/file:\/\/\/([^\/ ]+\/)*/g, "[ROOT]/")
-    .replace(/\.js/g, ".mjs");
+    .replace(/\.js/g, ".mjs")
+    .trim();
 };
 
 const filesCache = new Map();
