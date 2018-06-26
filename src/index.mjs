@@ -3,7 +3,7 @@ import path from "path";
 import { URL } from "url";
 import assert from "assert";
 
-import { analyze } from "./analyzer.mjs";
+import analyze from "./analyzer.mjs";
 import { redefine, removeRange, readFile } from "./utils.mjs";
 
 export async function resolve(specifier, parentURL, defaultResolver) {

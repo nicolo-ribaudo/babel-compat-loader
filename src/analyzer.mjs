@@ -77,7 +77,7 @@ function getCompiledExportMeta(node, url) {
   }
 }
 
-export function analyze(content, url) {
+export default function analyze(content, url) {
   let exportNames = esExportNames.get(url);
   if (exportNames) {
     const reexportNames = esReexports.get(url);
