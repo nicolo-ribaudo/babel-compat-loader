@@ -1,0 +1,4 @@
+{
+  "transform": ["module.mjs", "sub-module.mjs"],
+  "versions": [6, 7]
+}

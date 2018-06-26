@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`already-required-executed-once - babel 6: stderr 1`] = `undefined`;
+
+exports[`already-required-executed-once - babel 6: stdout 1`] = `"sub-module executed"`;
+
+exports[`already-required-executed-once - babel 7: stderr 1`] = `undefined`;
+
+exports[`already-required-executed-once - babel 7: stdout 1`] = `"sub-module executed"`;

@@ -1,0 +1,4 @@
+{
+  "transform": ["module.mjs"],
+  "versions": [6, 7]
+}
