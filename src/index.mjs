@@ -119,7 +119,8 @@ redefine(
 );
 
 // We need to overwrite this method to rpevent it from adding every cjs
-// file to the ESModules registry.
+// file to the ESModules registry. It will be done by the dynamicInstantiate
+// function.
 redefine(
   Module.prototype,
   "load",
