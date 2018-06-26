@@ -1,0 +1,4 @@
+node_modules
+.vscode
+test/fixtures/*/6
+test/fixtures/*/7
