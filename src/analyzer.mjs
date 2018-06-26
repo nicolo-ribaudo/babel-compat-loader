@@ -1,7 +1,11 @@
+import assert from "assert";
+
 import babylon from "@babel/parser";
 import t from "@babel/types";
 
-import { nonBabelCJS, esReexports, esExportNames } from "./meta.mjs";
+const nonBabelCJS = new Set();
+const esExportNames = new Map();
+const esReexports = new Map();
 
 function isExportsDotNameAssign(expr) {
   return (
@@ -74,17 +78,24 @@ function getCompiledExportMeta(node, url) {
 }
 
 export function analyze(content, url) {
-  if (esExportNames.has(url)) return true;
-  if (nonBabelCJS.has(url)) return false;
+  let exportNames = esExportNames.get(url);
+  if (exportNames) {
+    const reexportNames = esReexports.get(url);
+    assert(reexportNames);
+
+    return { wasEsModule: true, reexportNames, exportNames };
+  }
+  if (nonBabelCJS.has(url))
+    return { wasEsModule: false };
 
   if (content.indexOf("__esModule") === -1) {
     nonBabelCJS.add(url);
-    return false;
+    return { wasEsModule: false };
   }
 
   const ast = babylon.parse(content, { sourceType: "module" });
 
-  const exportNames = new Set();
+  exportNames = new Set();
   const reexportNames = new Set();
   let wasEsModule = false;
 
@@ -101,11 +112,11 @@ export function analyze(content, url) {
 
   if (!wasEsModule) {
     nonBabelCJS.add(url);
-    return false;
+    return { wasEsModule };
   }
 
   esExportNames.set(url, exportNames);
-  if (reexportNames.size > 0) esReexports.set(url, reexportNames);
+  esReexports.set(url, reexportNames);
 
-  return true;
+  return { wasEsModule, reexportNames, exportNames };
 }

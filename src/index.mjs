@@ -3,7 +3,6 @@ import path from "path";
 import { URL } from "url";
 import assert from "assert";
 
-import { esReexports, esExportNames } from "./meta.mjs";
 import { analyze } from "./analyzer.mjs";
 import { redefine, removeRange, readFile } from "./utils.mjs";
 
@@ -20,7 +19,7 @@ export async function dynamicInstantiate(url) {
   const filename = new URL(url).pathname;
 
   const content = await readFile(filename, "utf8");
-  const wasEsModule = analyze(content, url);
+  const { wasEsModule, exportNames } = analyze(content, url);
 
   if (!wasEsModule) {
     return {
@@ -38,18 +37,17 @@ export async function dynamicInstantiate(url) {
     };
   }
 
-  const exportsNames = esExportNames.get(url);
-  assert(exportsNames);
+  assert(exportNames);
 
   return {
-    exports: Array.from(exportsNames),
+    exports: Array.from(exportNames),
     execute(exports) {
       let module = Module._cache[filename];
       const cached = !!module;
 
       if (!cached) module = new Module(filename);
 
-      defineExoprtsAccessors(exportsNames, exports, module.exports);
+      defineExoprtsAccessors(exportNames, exports, module.exports);
 
       if (!cached) module.load(filename);
     }
@@ -86,18 +84,16 @@ redefine(
     function(content, filename) {
       const url = new URL(filename, "file://").href;
 
-      const wasEsModule = analyze(content, url);
+      const { wasEsModule, reexportNames } = analyze(content, url);
 
       if (!wasEsModule) return _compile.call(this, content, filename);
 
-      const reexports = esReexports.get(url);
-
-      if (reexports) {
+      if (reexportNames.size) {
         let initCode = "";
         // We handle reexports in reverse order because we need to manipulate the
         // source code. When we remove a statement, all the locations after that
         // don't match the original ast.
-        for (const reexport of Array.from(reexports).reverse()) {
+        for (const reexport of Array.from(reexportNames).reverse()) {
           const { moduleId, originalName, name, start, end } = reexport;
           initCode += `exports.${name} = ${moduleId}.${originalName};`;
 
