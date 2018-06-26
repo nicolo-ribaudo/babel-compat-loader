@@ -49,7 +49,7 @@ export async function dynamicInstantiate(url) {
 
       defineExoprtsAccessors(exportNames, exports, module.exports);
 
-      if (!cached) module.load(filename);
+      if (!cached) tryModuleLoad(module, filename);
     }
   };
 }
