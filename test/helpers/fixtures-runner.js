@@ -5,7 +5,6 @@ const {
   mapAsync,
   regG,
   canonicalyzeStderr,
-  equals,
   replaceMjsExt,
   readFileCached
 } = require("./utils.js");
