@@ -22,7 +22,7 @@ exports[`already-required-live-bindings - babel 7: stdout 1`] = `
 5"
 `;
 
-exports[`non-babel-cjs-doesnt-exxport-named - babel 7: stderr 1`] = `
+exports[`non-babel-cjs-doesnt-export-named: stderr 1`] = `
 "[ROOT]/index.mjs:1
 import { foo } from \\"./module.mjs\\";
          ^^^
@@ -30,7 +30,7 @@ SyntaxError: The requested module './module.mjs' does not provide an export name
     at ModuleJob._instantiate (internal/modules/esm/module_job.mjs:80:21)"
 `;
 
-exports[`non-babel-cjs-doesnt-exxport-named - babel 7: stdout 1`] = `undefined`;
+exports[`non-babel-cjs-doesnt-export-named: stdout 1`] = `undefined`;
 
 exports[`non-babel-cjs-exports-default - babel 7: stderr 1`] = `undefined`;
 
