@@ -1,6 +1,6 @@
 # babel-compat-loader
 
-> A node loader to `import` modules compiled by Babel a if they were native ESM.
+> A node loader to `import` modules compiled by Babel as if they were native ESM.
 
 ## Installation
 
