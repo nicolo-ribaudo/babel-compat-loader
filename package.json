@@ -1,6 +1,6 @@
 {
   "name": "babel-compat-loader",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A node loader to import modules compiled by Babel a if they were native ESM.",
   "main": "src/index.mjs",
   "repository": "https://github.com/nicolo-ribaudo/babel-compat-loader",
@@ -27,6 +27,8 @@
     "node": ">= 10"
   },
   "jest": {
-    "testMatch": ["**/test/*.js"]
+    "testMatch": [
+      "**/test/*.js"
+    ]
   }
 }
