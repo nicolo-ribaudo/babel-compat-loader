@@ -1,7 +1,7 @@
 {
   "name": "babel-compat-loader",
   "version": "1.0.0",
-  "description": "Import named exports from modules compiled using Babel.",
+  "description": "A node loader to import modules compiled by Babel a if they were native ESM.",
   "main": "src/index.js",
   "repository": "https://github.com/nicolo-ribaudo/babel-compat-loader",
   "author": "Nicolò Ribaudo (https://github.com/nicolo-ribaudo)",
